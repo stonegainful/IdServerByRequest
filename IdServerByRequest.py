@@ -71,32 +71,38 @@ def main():
                     headPoweredBy = response.headers.get('X-Powered-By')
                     headAspVer = response.headers.get('X-AspNet-Version')
 
+                    iServer=False
+                    iPoweredBy=False
                     print('\nURL:', url)
                     if headServer:
                         version = re.findall('[0-9]+', headServer)
                         if len(version)>0:
+                            iServer=True
                             print('Server:', headServer)
                     if headPoweredBy:
                         version = re.findall('[0-9]+', headPoweredBy)
                         if len(version)>0:
+                            iPoweredBy=True
                             print('X-Powered-By:', headPoweredBy)
                     if headAspVer:
                         version = re.findall('[0-9]+', headAspVer)
                         if len(version)>0:
+                            iPoweredBy=True
                             print('X-AspNet-Version:', headAspVer)
 
                     #Delete cookies for compact response
                     response.headers.pop('Set-Cookie', None)
-                    now = datetime.now() # current date and time
-                    tmp_filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
-                    image = text_image(response.headers, url)
-                    tmp_path = os.path.join('./',foldername, tmp_filename)
-                    image.save(tmp_path)
-
-                    textWriter.writerow([url, headServer, headPoweredBy, headAspVer, tmp_filename])
+                    #Verify if exist version of Server | X-Powered-By to consider
+                    if iServer==True or iPoweredBy==True:
+                        now = datetime.now() # current date and time
+                        tmp_filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
+                        image = text_image(response.headers, url)
+                        tmp_path = os.path.join('./',foldername, tmp_filename)
+                        image.save(tmp_path)
+                        textWriter.writerow([url, headServer, headPoweredBy, headAspVer, tmp_filename])
 
                 except ConnectionError:
-                    print (f'Se omite la URL no se obtuvo respuesta')
+                    print (f'Se omite la URL {url} tienes problemas de respuesta')
 
         print('\n[**] Proceso finalizado \n')
         print(f'[**] Resultado almacenado en {path_dest} \n')
@@ -118,37 +124,50 @@ def main():
             headPoweredBy = response.headers.get('X-Powered-By')
             headAspVer = response.headers.get('X-AspNet-Version')
 
+            iServer=False
+            iPoweredBy=False
+
             if headServer:
                 version = re.findall('[0-9]+', headServer)
                 if len(version)>0:
+                    iServer=True
                     print('Server:', headServer)
             if headPoweredBy:
                 version = re.findall('[0-9]+', headPoweredBy)
                 if len(version)>0:
+                    iPoweredBy=True
                     print('X-Powered-By:', headPoweredBy)
             if headAspVer:
                 version = re.findall('[0-9]+', headAspVer)
                 if len(version)>0:
+                    iPoweredBy=True
                     print('X-AspNet-Version:', headAspVer)
                 
             #Delete cookies for compact response
             response.headers.pop('Set-Cookie', None)
-            now = datetime.now() # current date and time
-            filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
-            image = text_image(response.headers, url)
-            image.save(filename)
 
-            headerCols = ("Nombre del Sitio","Server","X-Powered-By","X-AspNet-Version","Evidencia")
-            with open(pathOutput, 'w', newline='') as csvfile:
-                textWriter = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                textWriter.writerow(headerCols)
-                textWriter.writerow([url, headServer, headPoweredBy, headAspVer, filename])
+            #Verify if exist version of Server | X-Powered-By to consider
+            if iServer==True or iPoweredBy==True:
+                now = datetime.now() # current date and time
+                filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
+                image = text_image(response.headers, url)
+                image.save(filename)
+
+                headerCols = ("Nombre del Sitio","Server","X-Powered-By","X-AspNet-Version","Evidencia")
+                with open(pathOutput, 'w', newline='') as csvfile:
+                    textWriter = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    textWriter.writerow(headerCols)
+                    textWriter.writerow([url, headServer, headPoweredBy, headAspVer, filename])
+            else:
+                print("[**] No hay URL con los criterios indicados.")
 
         except ConnectionError:
             print ('Ha fallado obtener respuesta de la URL {url}')
 
         print('\n[**] Proceso finalizado. \n')
-        print(f'[**] Resultado almacenado en {pathOutput} \n')
+        #Verify if exist version of Server | X-Powered-By to consider
+        if iServer==True or iPoweredBy==True:
+            print(f'[**] Resultado almacenado en {pathOutput} \n')
         main()
 
     if (option == 3):
