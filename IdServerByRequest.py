@@ -94,8 +94,8 @@ def main():
                     response.headers.pop('Set-Cookie', None)
                     #Verify if exist version of Server | X-Powered-By to consider
                     if iServer==True or iPoweredBy==True:
-                        now = datetime.now() # current date and time
-                        tmp_filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
+                        date_s = (datetime.now().strftime('%Y-%m-%d %H%M%S%f')[:-3]) # current date and time
+                        tmp_filename = date_s+'.png'
                         image = text_image(response.headers, url)
                         tmp_path = os.path.join('./',foldername, tmp_filename)
                         image.save(tmp_path)
@@ -148,8 +148,8 @@ def main():
 
             #Verify if exist version of Server | X-Powered-By to consider
             if iServer==True or iPoweredBy==True:
-                now = datetime.now() # current date and time
-                filename = now.strftime("%Y%m%d_%H%M%S")+'.png'
+                date_s = (datetime.now().strftime('%Y-%m-%d %H%M%S%f')[:-3]) # current date and time
+                filename = date_s+'.png'
                 image = text_image(response.headers, url)
                 image.save(filename)
 
@@ -175,7 +175,7 @@ def main():
 
     else:
         print("\nOpcion no valida... Intente de nuevo otra vez >>\n")
-        #main()
+
 
 
 def text_image(plain_text, title='', font_path=None):
@@ -216,9 +216,8 @@ def text_image(plain_text, title='', font_path=None):
     horizontal_position = 5
 
     draw.text((horizontal_position, vertical_position), text, fill=PIXEL_ON,font=font)
-
-    text_w, text_h = draw.textsize(title, font)
-    draw.text(((width - text_w) // 2, height - text_h), title, fill=PIXEL_ON,font=font)
+    #text_w, text_h = draw.textsize(title, font)
+    #draw.text(((width - text_w) // 2, height - text_h), title, fill=PIXEL_ON,font=font)
 
     return image
 
